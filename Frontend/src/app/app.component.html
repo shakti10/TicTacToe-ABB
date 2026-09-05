@@ -1,0 +1,106 @@
+<main class="app-shell">
+  <section class="game-layout">
+    <header class="masthead">
+      <div>
+        <p class="eyebrow">Local match room</p>
+        <h1>Three in a row.</h1>
+        <p class="intro">A small, honest game of focus, timing, and one very decisive square.</p>
+      </div>
+      <div class="connection-status" [class.is-loading]="loading">
+        <span class="status-dot"></span>
+        {{ loading ? 'Updating board' : 'Server state synced' }}
+      </div>
+    </header>
+
+    <div class="mode-bar" aria-label="Game mode">
+      <span class="mode-label">Choose your match</span>
+      <div class="mode-options">
+        <button type="button" [class.active]="selectedMode === 'TwoPlayer'" (click)="selectMode('TwoPlayer')">
+          <span class="mode-mark">X/O</span>
+          Two players
+        </button>
+        <button type="button" [class.active]="selectedMode === 'Computer'" (click)="selectMode('Computer')">
+          <span class="mode-mark">X/AI</span>
+          Play computer
+        </button>
+      </div>
+    </div>
+
+    <div class="content-grid" *ngIf="game as currentGame; else connecting">
+      <section class="board-panel" aria-label="Tic Tac Toe game board">
+        <div class="board-heading">
+          <div>
+            <p class="eyebrow">{{ modeLabel() }}</p>
+            <h2>{{ statusLabel() }}</h2>
+          </div>
+          <span class="round-number">Move {{ currentGame.moveHistory.length + 1 | number: '2.0-0' }}</span>
+        </div>
+
+        <div class="board" [class.is-complete]="currentGame.status !== 'InProgress'">
+          <ng-container *ngFor="let row of [1, 2, 3]">
+            <button
+              *ngFor="let column of [1, 2, 3]"
+              type="button"
+              class="cell"
+              [class.winner]="isWinningCell(row, column)"
+              [class.cell-x]="cellValue(row, column) === 'X'"
+              [class.cell-o]="cellValue(row, column) === 'O'"
+              [disabled]="isDisabled(row, column)"
+              [attr.aria-label]="'Row ' + row + ', column ' + column"
+              (click)="play(row, column)">
+              <span>{{ cellValue(row, column) }}</span>
+            </button>
+          </ng-container>
+        </div>
+
+        <div class="board-actions">
+          <button type="button" class="primary-action" (click)="resetGame()" [disabled]="loading">Reset game</button>
+          <button type="button" class="quiet-action" (click)="undo()" [disabled]="loading || currentGame.moveHistory.length === 0 || currentGame.status !== 'InProgress'">Undo last move</button>
+        </div>
+
+        <p class="error-message" *ngIf="errorMessage" role="alert">{{ errorMessage }}</p>
+      </section>
+
+      <aside class="side-column">
+        <section class="score-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Session scoreboard</p>
+              <h2>Keep the count</h2>
+            </div>
+            <button type="button" class="icon-action" title="Reset scoreboard" aria-label="Reset scoreboard" (click)="resetScoreboard()" [disabled]="loading">↺</button>
+          </div>
+          <div class="score-grid">
+            <div><strong>{{ currentGame.scoreboard.xWins }}</strong><span>X wins</span></div>
+            <div><strong>{{ currentGame.scoreboard.oWins }}</strong><span>O wins</span></div>
+            <div><strong>{{ currentGame.scoreboard.draws }}</strong><span>Draws</span></div>
+          </div>
+        </section>
+
+        <section class="history-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Match record</p>
+              <h2>Move history</h2>
+            </div>
+            <span class="move-count">{{ currentGame.moveHistory.length }} moves</span>
+          </div>
+          <div class="history-empty" *ngIf="currentGame.moveHistory.length === 0">The opening square is yours.</div>
+          <ol class="history-list" *ngIf="currentGame.moveHistory.length > 0">
+            <li *ngFor="let move of currentGame.moveHistory">
+              <span class="move-number">{{ move.moveNumber | number: '2.0-0' }}</span>
+              <span class="history-player" [class.o-player]="move.player === 'O'">{{ move.player }}</span>
+              <span>Row {{ move.row }}, Column {{ move.column }}</span>
+            </li>
+          </ol>
+        </section>
+      </aside>
+    </div>
+
+    <ng-template #connecting>
+      <section class="loading-panel">Connecting to the local game server...</section>
+    </ng-template>
+
+    <footer>Game state and scoring are managed by the local API.</footer>
+  </section>
+</main>
