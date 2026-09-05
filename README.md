@@ -8,6 +8,16 @@ The backend owns the game state, validation, move history, game status, computer
 
 The implementation stays intentionally small: in-memory storage, one active session scoreboard, and no authentication or database setup.
 
+## Screenshots
+
+### Angular Frontend
+
+![Tic Tac Toe Angular frontend](Backend/TicTactToe.Api/UI-Image.PNG)
+
+### Swagger API
+
+![Tic Tac Toe API Swagger documentation](Backend/TicTactToe.Api/WebApi-Image.PNG)
+
 ## Tech Stack
 
 - Frontend: Angular 18, TypeScript, SCSS
